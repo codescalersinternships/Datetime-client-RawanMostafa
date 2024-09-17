@@ -5,10 +5,11 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"time"
 )
 
 func main() {
-	c := http.Client{}
+    c := http.Client{Timeout: time.Duration(1) * time.Second}
 	resp, err := c.Get("http://localhost:8080/datetime")
 	if err != nil {
 		log.Fatalf("Error in sending request: %v", err)
