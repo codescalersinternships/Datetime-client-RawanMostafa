@@ -8,7 +8,7 @@ import (
 
 func main() {
 	c := pkg.CreateClient()
-	resp, err := pkg.SendRequest(c, "8080")
+	resp, err := pkg.SendRequest(c, "8083")
 	if err != nil {
 		log.Fatal(err)
 	}
