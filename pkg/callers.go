@@ -21,8 +21,8 @@ func ReadBody(resp *http.Response) (string, error) {
 	return string(body), nil
 }
 
-func SendRequest(c http.Client, port string) (*http.Response, error) {
-	resp, err := c.Get("http://localhost:" + port + "/datetime")
+func SendRequest(c http.Client, baseUrl string, endpoint string, port string) (*http.Response, error) {
+	resp, err := c.Get(baseUrl + ":" + port + endpoint)
 	if err != nil {
 		return nil, fmt.Errorf("error in sending request: %v", err)
 	}
