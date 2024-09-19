@@ -2,7 +2,10 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -12,6 +15,16 @@ import (
 const defaltBaseUrl = "http://localhost"
 const defaultEndpoint = "/datetime"
 const defaultPort = "8083"
+
+func readBody(resp *http.Response) (string, error) {
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("error in reading request body: %v", err)
+
+	}
+	return string(body), nil
+}
 
 func getFlags() (string, string, string) {
 	var port string
@@ -66,11 +79,11 @@ func main() {
 	baseUrl, endpoint, port := decideConfigs()
 
 	c := pkg.NewClient(baseUrl, endpoint, port, time.Second)
-	resp, err := c.SendRequest()
+	resp, err := c.SendRequest("text/plain")
 	if err != nil {
 		log.Fatal(err)
 	}
-	body, err := c.ReadBody(resp)
+	body, err := readBody(resp)
 	if err != nil {
 		log.Fatal(err)
 	}
