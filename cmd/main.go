@@ -4,50 +4,73 @@ import (
 	"flag"
 	"log"
 	"os"
+	"time"
 
 	pkg "github.com/codescalersinternships/Datetime-client-RawanMostafa/pkg"
 )
 
-func setEnv(url string, endpoint string, port string) {
-	err := os.Setenv("DATETIME_URL", url)
-	if err != nil {
-		log.Fatalf("Error in setting url env var: %v", err)
-	}
-	err = os.Setenv("DATETIME_ENDPOINT", endpoint)
-	if err != nil {
-		log.Fatalf("Error in setting endpoint env var: %v", err)
-	}
-	err = os.Setenv("DATETIME_PORT", port)
-	if err != nil {
-		log.Fatalf("Error in setting port env var: %v", err)
-	}
-}
+const defaltBaseUrl = "http://localhost"
+const defaultEndpoint = "/datetime"
+const defaultPort = "8083"
 
 func getFlags() (string, string, string) {
 	var port string
 	flag.StringVar(&port, "port", "", "Specifies the port")
 
-	var url string
-	flag.StringVar(&url, "url", "", "Specifies the base url")
+	var baseUrl string
+	flag.StringVar(&baseUrl, "baseUrl", "", "Specifies the base url")
 
 	var endpoint string
 	flag.StringVar(&endpoint, "endpoint", "", "Specifies the endpoint")
 
 	flag.Parse()
-	return url, endpoint, port
+	return baseUrl, endpoint, port
 }
+
+func decideConfigs() (string, string, string) {
+
+	baseUrl, endpoint, port := getFlags()
+
+	if baseUrl == "" {
+		envBaseUrl, found := os.LookupEnv("DATETIME_BASEURL")
+
+		if found {
+			baseUrl = envBaseUrl
+		} else {
+			baseUrl = defaltBaseUrl
+		}
+	}
+	if endpoint == "" {
+		envEndpoint, found := os.LookupEnv("DATETIME_ENDPOINT")
+
+		if found {
+			endpoint = envEndpoint
+		} else {
+			endpoint = defaultEndpoint
+		}
+	}
+	if port == "" {
+		envPort, found := os.LookupEnv("DATETIME_PORT")
+
+		if found {
+			port = envPort
+		} else {
+			port = defaultPort
+		}
+	}
+	return baseUrl, endpoint, port
+
+}
+
 func main() {
+	baseUrl, endpoint, port := decideConfigs()
 
-	url, endpoint, port := getFlags()
-
-	setEnv(url, endpoint, port)
-
-	c := pkg.CreateClient()
-	resp, err := pkg.SendRequest(c)
+	c := pkg.NewClient(baseUrl, endpoint, port, time.Second)
+	resp, err := c.SendRequest()
 	if err != nil {
 		log.Fatal(err)
 	}
-	body, err := pkg.ReadBody(resp)
+	body, err := c.ReadBody(resp)
 	if err != nil {
 		log.Fatal(err)
 	}
