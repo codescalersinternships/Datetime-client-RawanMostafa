@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -21,8 +22,22 @@ func ReadBody(resp *http.Response) (string, error) {
 	return string(body), nil
 }
 
-func SendRequest(c http.Client, baseUrl string, endpoint string, port string) (*http.Response, error) {
-	resp, err := c.Get(baseUrl + ":" + port + endpoint)
+func SendRequest(c http.Client) (*http.Response, error) {
+	url := os.Getenv("DATETIME_URL")
+	endpoint := os.Getenv("DATETIME_ENDPOINT")
+	port := os.Getenv("DATETIME_PORT")
+
+	if url == "" {
+		url = "http://localhost"
+	}
+	if endpoint == "" {
+		endpoint = "/datetime"
+	}
+	if port == "" {
+		port = "8083"
+	}
+
+	resp, err := c.Get(url + ":" + port + endpoint)
 	if err != nil {
 		return nil, fmt.Errorf("error in sending request: %v", err)
 	}
