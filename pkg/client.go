@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/cenkalti/backoff/v4"
 )
 
 type Client struct {
@@ -22,7 +24,7 @@ func NewClient(baseUrl string, endpoint string, port string, timeout time.Durati
 	}
 }
 
-func (c Client) SendRequest(contentType string) (*http.Response, error) {
+func (c Client) sendRequest(contentType string) (*http.Response, error) {
 	req, err := http.NewRequest("GET", c.baseUrl+":"+c.port+c.endpoint, nil)
 	if err != nil {
 		return nil, err
@@ -33,4 +35,22 @@ func (c Client) SendRequest(contentType string) (*http.Response, error) {
 		return nil, fmt.Errorf("error in sending request: %v", err)
 	}
 	return resp, nil
+}
+
+func (c Client) RetrySendRequest(contentType string) (*http.Response, error) {
+	var resp *http.Response
+	var err error
+
+	retryError := backoff.RetryNotify(func() error {
+		resp, err = c.sendRequest(contentType)
+		return err
+	}, backoff.NewExponentialBackOff(), func(err error, d time.Duration) {
+		fmt.Print("Retry Happenned")
+	})
+
+	if retryError != nil {
+		return resp, fmt.Errorf("failed to make the request after retries: %v", err)
+	} else {
+		return resp, nil
+	}
 }

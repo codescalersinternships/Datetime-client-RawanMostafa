@@ -79,7 +79,7 @@ func main() {
 	baseUrl, endpoint, port := decideConfigs()
 
 	c := pkg.NewClient(baseUrl, endpoint, port, time.Second)
-	resp, err := c.SendRequest("text/plain")
+	resp, err := c.RetrySendRequest("text/plain")
 	if err != nil {
 		log.Fatal(err)
 	}

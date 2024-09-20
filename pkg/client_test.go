@@ -31,7 +31,9 @@ func readBody(t *testing.T, resp *http.Response) ([]byte, error) {
 	return body, nil
 }
 
-func TestSendRequest(t *testing.T) {
+
+
+func TestRetrySendRequest(t *testing.T) {
 	formattedTime := time.Now().Format("2024/09/19 12:57:04")
 	timeJson, err := json.Marshal(formattedTime)
 	if err != nil {
@@ -42,7 +44,6 @@ func TestSendRequest(t *testing.T) {
 		baseUrl     string
 		endpoint    string
 		port        string
-		timeout     time.Duration
 		expected    any
 		contentType string
 		statusCode  int
@@ -53,7 +54,6 @@ func TestSendRequest(t *testing.T) {
 			endpoint:    "/datetime",
 			port:        "8083",
 			contentType: "text/plain",
-			timeout:     time.Second,
 			expected:    formattedTime,
 			statusCode:  http.StatusOK,
 		},
@@ -63,7 +63,6 @@ func TestSendRequest(t *testing.T) {
 			endpoint:    "/datetime",
 			port:        "8080",
 			contentType: "application/json",
-			timeout:     time.Second,
 			expected:    timeJson,
 			statusCode:  http.StatusOK,
 		},
@@ -73,7 +72,6 @@ func TestSendRequest(t *testing.T) {
 			endpoint:    "/datetime",
 			port:        "8080",
 			contentType: "text/plain",
-			timeout:     time.Second,
 			expected:    formattedTime,
 			statusCode:  http.StatusOK,
 		},
@@ -83,7 +81,6 @@ func TestSendRequest(t *testing.T) {
 			endpoint:    "/datetime",
 			port:        "8083",
 			contentType: "application/json",
-			timeout:     time.Second,
 			expected:    timeJson,
 			statusCode:  http.StatusOK,
 		},
@@ -93,7 +90,6 @@ func TestSendRequest(t *testing.T) {
 			endpoint:    "/datetime",
 			port:        "8083",
 			contentType: "text/javascript; charset=utf-8",
-			timeout:     time.Second,
 			expected:    http.StatusText(http.StatusUnsupportedMediaType),
 			statusCode:  http.StatusUnsupportedMediaType,
 		},
@@ -101,7 +97,7 @@ func TestSendRequest(t *testing.T) {
 	for _, testcase := range testcases {
 		t.Run(testcase.name, func(t *testing.T) {
 			c := NewClient(testcase.baseUrl, testcase.endpoint, testcase.port, time.Second)
-			resp, err := c.SendRequest(testcase.contentType)
+			resp, err := c.RetrySendRequest(testcase.contentType)
 			if err != nil {
 				t.Error(err)
 			}
