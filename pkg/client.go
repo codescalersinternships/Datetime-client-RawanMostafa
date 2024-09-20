@@ -41,11 +41,14 @@ func (c Client) RetrySendRequest(contentType string) (*http.Response, error) {
 	var resp *http.Response
 	var err error
 
+	expBackoff := backoff.NewExponentialBackOff()
+	expBackoff.MaxElapsedTime = 10 * time.Second
+	
 	retryError := backoff.RetryNotify(func() error {
 		resp, err = c.sendRequest(contentType)
 		return err
-	}, backoff.NewExponentialBackOff(), func(err error, d time.Duration) {
-		fmt.Print("Retry Happenned")
+	}, expBackoff, func(err error, d time.Duration) {
+		fmt.Println("Retry Happenned")
 	})
 
 	if retryError != nil {
