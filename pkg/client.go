@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
+	"golang.org/x/exp/slog"
 )
 
 type Client struct {
@@ -16,6 +17,7 @@ type Client struct {
 }
 
 func NewClient(baseUrl string, endpoint string, port string, timeout time.Duration) Client {
+	slog.Info("New Client created! \n")
 	return Client{
 		baseUrl:  baseUrl,
 		endpoint: endpoint,
@@ -25,15 +27,23 @@ func NewClient(baseUrl string, endpoint string, port string, timeout time.Durati
 }
 
 func (c Client) sendRequest(contentType string) (*http.Response, error) {
-	req, err := http.NewRequest("GET", c.baseUrl+":"+c.port+c.endpoint, nil)
+	url := c.baseUrl + ":" + c.port + c.endpoint
+
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
+		slog.Error("couldn't create the request with url: %s", url)
 		return nil, err
 	}
+
 	req.Header.Add("content-type", contentType)
 	resp, err := c.client.Do(req)
+
 	if err != nil {
+		slog.Error("couldn't send the request with url: %s", url)
 		return nil, fmt.Errorf("error in sending request: %v", err)
 	}
+	slog.Info("your request has been sent successfully!")
+
 	return resp, nil
 }
 
@@ -43,15 +53,16 @@ func (c Client) RetrySendRequest(contentType string) (*http.Response, error) {
 
 	expBackoff := backoff.NewExponentialBackOff()
 	expBackoff.MaxElapsedTime = 10 * time.Second
-	
+
 	retryError := backoff.RetryNotify(func() error {
 		resp, err = c.sendRequest(contentType)
 		return err
 	}, expBackoff, func(err error, d time.Duration) {
-		fmt.Println("Retry Happenned")
+		slog.Warn("Request failed, Retrying ...")
 	})
 
 	if retryError != nil {
+		slog.Error("failed to make the request after retries: %v", err)
 		return resp, fmt.Errorf("failed to make the request after retries: %v", err)
 	} else {
 		return resp, nil
