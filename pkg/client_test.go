@@ -35,7 +35,7 @@ func readBody(t *testing.T, resp *http.Response) ([]byte, error) {
 }
 
 func TestRetrySendRequest(t *testing.T) {
-	formattedTime := time.Now().Format("2024/09/19 12:57:04")
+	formattedTime := time.Now().Format(time.ANSIC)
 	timeJson, err := json.Marshal(formattedTime)
 	if err != nil {
 		t.Errorf("error converting to json: %v", err)
@@ -120,7 +120,7 @@ func TestRetrySendRequest(t *testing.T) {
 }
 
 func TestWithMockServer(t *testing.T) {
-	formattedTime := time.Now().Format("2024/09/19 12:57:04")
+	formattedTime := time.Now().Format(time.ANSIC)
 	timeJson, err := json.Marshal(formattedTime)
 	if err != nil {
 		t.Errorf("error converting to json: %v", err)
@@ -166,7 +166,7 @@ func TestWithMockServer(t *testing.T) {
 		t.Run(testcase.name, func(t *testing.T) {
 			mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				currentTime := time.Now()
-				formattedTime := currentTime.Format("2024/09/19 12:57:04")
+				formattedTime := currentTime.Format(time.ANSIC)
 
 				if strings.Contains(r.Header.Get("content-type"), "text/plain") {
 
