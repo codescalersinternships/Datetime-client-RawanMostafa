@@ -1,3 +1,4 @@
+// This package implements an http client
 package pkg
 
 import (
@@ -9,6 +10,7 @@ import (
 	"golang.org/x/exp/slog"
 )
 
+// Client holds the configurations of the http client as well as the actual http.Client object
 type Client struct {
 	baseUrl  string
 	endpoint string
@@ -16,6 +18,7 @@ type Client struct {
 	client   http.Client
 }
 
+// NewClient takes the baseUrl, endpoint, port and timeout and returns a Client object
 func NewClient(baseUrl string, endpoint string, port string, timeout time.Duration) Client {
 	slog.Info("New Client created! \n")
 	return Client{
@@ -26,7 +29,9 @@ func NewClient(baseUrl string, endpoint string, port string, timeout time.Durati
 	}
 }
 
-func (c Client) sendRequest(contentType string) (*http.Response, error) {
+// SendRequest takes the wanted content type as a string, creates the request
+// and adds the content-type header then send the request and returns the response and an error if exists
+func (c Client) SendRequest(contentType string) (*http.Response, error) {
 	url := c.baseUrl + ":" + c.port + c.endpoint
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -47,6 +52,9 @@ func (c Client) sendRequest(contentType string) (*http.Response, error) {
 	return resp, nil
 }
 
+// RetrySendRequest takes the wanted content type as a string, creates and sends the request and uses the retry mechanism
+// for maximum of 10 seconds before the request fails
+// it then returns the response and an error if it failed to send for 10 seconds
 func (c Client) RetrySendRequest(contentType string) (*http.Response, error) {
 	var resp *http.Response
 	var err error
@@ -55,7 +63,7 @@ func (c Client) RetrySendRequest(contentType string) (*http.Response, error) {
 	expBackoff.MaxElapsedTime = 10 * time.Second
 
 	retryError := backoff.RetryNotify(func() error {
-		resp, err = c.sendRequest(contentType)
+		resp, err = c.SendRequest(contentType)
 		return err
 	}, expBackoff, func(err error, d time.Duration) {
 		slog.Warn("Request failed, Retrying ...")
