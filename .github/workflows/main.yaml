@@ -33,6 +33,19 @@ jobs:
         with:
           gofmt-path: './src'
           gofmt-flags: '-l -d'
+
+  pull-run-images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: pull http server
+        run: docker pull rawanmostafa/httpserver:latest
+      - name: pull gin server
+        run: docker pull rawanmostafa/ginserver:latest
+      - name: run http server
+        run: docker run -p 8080:8080 rawanmostafa/httpserver:latest
+      - name: run gin server
+        run: docker run -p 8083:8083 rawanmostafa/ginserver:latest
+        
   test:
     runs-on: ubuntu-latest
     steps:

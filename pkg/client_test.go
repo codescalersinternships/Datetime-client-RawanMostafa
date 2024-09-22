@@ -33,176 +33,175 @@ func readBody(t *testing.T, resp *http.Response) ([]byte, error) {
 	}
 	return body, nil
 }
+func TestRetrySendRequest(t *testing.T) {
+	formattedTime := time.Now().Format(time.ANSIC)
+	timeJson, err := json.Marshal(formattedTime)
+	if err != nil {
+		t.Errorf("error converting to json: %v", err)
+	}
+	testcases := []struct {
+		name        string
+		baseUrl     string
+		endpoint    string
+		port        string
+		expected    any
+		contentType string
+		statusCode  int
+	}{
+		{
+			name:        "correct configs, gin, plain text",
+			baseUrl:     "http://localhost",
+			endpoint:    "/datetime",
+			port:        "8083",
+			contentType: "text/plain",
+			expected:    formattedTime,
+			statusCode:  http.StatusOK,
+		},
+		{
+			name:        "correct configs, gin, json",
+			baseUrl:     "http://localhost",
+			endpoint:    "/datetime",
+			port:        "8080",
+			contentType: "application/json",
+			expected:    timeJson,
+			statusCode:  http.StatusOK,
+		},
+		{
+			name:        "correct configs, http, plain text",
+			baseUrl:     "http://localhost",
+			endpoint:    "/datetime",
+			port:        "8080",
+			contentType: "text/plain",
+			expected:    formattedTime,
+			statusCode:  http.StatusOK,
+		},
+		{
+			name:        "correct configs, http, json",
+			baseUrl:     "http://localhost",
+			endpoint:    "/datetime",
+			port:        "8083",
+			contentType: "application/json",
+			expected:    timeJson,
+			statusCode:  http.StatusOK,
+		},
+		{
+			name:        "unsupported content type",
+			baseUrl:     "http://localhost",
+			endpoint:    "/datetime",
+			port:        "8083",
+			contentType: "text/javascript; charset=utf-8",
+			expected:    http.StatusText(http.StatusUnsupportedMediaType),
+			statusCode:  http.StatusUnsupportedMediaType,
+		},
+	}
+	for _, testcase := range testcases {
+		t.Run(testcase.name, func(t *testing.T) {
 
-// func TestRetrySendRequest(t *testing.T) {
-// 	formattedTime := time.Now().Format(time.ANSIC)
-// 	timeJson, err := json.Marshal(formattedTime)
-// 	if err != nil {
-// 		t.Errorf("error converting to json: %v", err)
-// 	}
-// 	testcases := []struct {
-// 		name        string
-// 		baseUrl     string
-// 		endpoint    string
-// 		port        string
-// 		expected    any
-// 		contentType string
-// 		statusCode  int
-// 	}{
-// 		{
-// 			name:        "correct configs, gin, plain text",
-// 			baseUrl:     "http://localhost",
-// 			endpoint:    "/datetime",
-// 			port:        "8083",
-// 			contentType: "text/plain",
-// 			expected:    formattedTime,
-// 			statusCode:  http.StatusOK,
-// 		},
-// 		{
-// 			name:        "correct configs, gin, json",
-// 			baseUrl:     "http://localhost",
-// 			endpoint:    "/datetime",
-// 			port:        "8080",
-// 			contentType: "application/json",
-// 			expected:    timeJson,
-// 			statusCode:  http.StatusOK,
-// 		},
-// 		{
-// 			name:        "correct configs, http, plain text",
-// 			baseUrl:     "http://localhost",
-// 			endpoint:    "/datetime",
-// 			port:        "8080",
-// 			contentType: "text/plain",
-// 			expected:    formattedTime,
-// 			statusCode:  http.StatusOK,
-// 		},
-// 		{
-// 			name:        "correct configs, http, json",
-// 			baseUrl:     "http://localhost",
-// 			endpoint:    "/datetime",
-// 			port:        "8083",
-// 			contentType: "application/json",
-// 			expected:    timeJson,
-// 			statusCode:  http.StatusOK,
-// 		},
-// 		{
-// 			name:        "unsupported content type",
-// 			baseUrl:     "http://localhost",
-// 			endpoint:    "/datetime",
-// 			port:        "8083",
-// 			contentType: "text/javascript; charset=utf-8",
-// 			expected:    http.StatusText(http.StatusUnsupportedMediaType),
-// 			statusCode:  http.StatusUnsupportedMediaType,
-// 		},
-// 	}
-// 	for _, testcase := range testcases {
-// 		t.Run(testcase.name, func(t *testing.T) {
+			c := NewClient(testcase.baseUrl, testcase.endpoint, testcase.port, time.Second)
+			resp, err := c.RetrySendRequest(testcase.contentType)
+			if err != nil {
+				t.Error(err)
+			}
+			resBody, err := readBody(t, resp)
+			if err != nil {
+				t.Error(err)
+			}
 
-// 			c := NewClient(testcase.baseUrl, testcase.endpoint, testcase.port, time.Second)
-// 			resp, err := c.RetrySendRequest(testcase.contentType)
-// 			if err != nil {
-// 				t.Error(err)
-// 			}
-// 			resBody, err := readBody(t, resp)
-// 			if err != nil {
-// 				t.Error(err)
-// 			}
+			if testcase.contentType == "application/json" {
+				assertEquality(t, testcase.expected, resBody)
+			} else {
+				assertEquality(t, testcase.expected, string(resBody))
+			}
+			assertEquality(t, testcase.statusCode, resp.StatusCode)
 
-// 			if testcase.contentType == "application/json" {
-// 				assertEquality(t, testcase.expected, resBody)
-// 			} else {
-// 				assertEquality(t, testcase.expected, string(resBody))
-// 			}
-// 			assertEquality(t, testcase.statusCode, resp.StatusCode)
+		})
+	}
+}
 
-// 		})
-// 	}
-// }
+func TestSendRequest(t *testing.T) {
+	formattedTime := time.Now().Format(time.ANSIC)
+	timeJson, err := json.Marshal(formattedTime)
+	if err != nil {
+		t.Errorf("error converting to json: %v", err)
+	}
+	testcases := []struct {
+		name        string
+		baseUrl     string
+		endpoint    string
+		port        string
+		expected    any
+		contentType string
+		statusCode  int
+	}{
+		{
+			name:        "correct configs, gin, plain text",
+			baseUrl:     "http://localhost",
+			endpoint:    "/datetime",
+			port:        "8083",
+			contentType: "text/plain",
+			expected:    formattedTime,
+			statusCode:  http.StatusOK,
+		},
+		{
+			name:        "correct configs, gin, json",
+			baseUrl:     "http://localhost",
+			endpoint:    "/datetime",
+			port:        "8080",
+			contentType: "application/json",
+			expected:    timeJson,
+			statusCode:  http.StatusOK,
+		},
+		{
+			name:        "correct configs, http, plain text",
+			baseUrl:     "http://localhost",
+			endpoint:    "/datetime",
+			port:        "8080",
+			contentType: "text/plain",
+			expected:    formattedTime,
+			statusCode:  http.StatusOK,
+		},
+		{
+			name:        "correct configs, http, json",
+			baseUrl:     "http://localhost",
+			endpoint:    "/datetime",
+			port:        "8083",
+			contentType: "application/json",
+			expected:    timeJson,
+			statusCode:  http.StatusOK,
+		},
+		{
+			name:        "unsupported content type",
+			baseUrl:     "http://localhost",
+			endpoint:    "/datetime",
+			port:        "8083",
+			contentType: "text/javascript; charset=utf-8",
+			expected:    http.StatusText(http.StatusUnsupportedMediaType),
+			statusCode:  http.StatusUnsupportedMediaType,
+		},
+	}
+	for _, testcase := range testcases {
+		t.Run(testcase.name, func(t *testing.T) {
 
-// func TestSendRequest(t *testing.T) {
-// 	formattedTime := time.Now().Format(time.ANSIC)
-// 	timeJson, err := json.Marshal(formattedTime)
-// 	if err != nil {
-// 		t.Errorf("error converting to json: %v", err)
-// 	}
-// 	testcases := []struct {
-// 		name        string
-// 		baseUrl     string
-// 		endpoint    string
-// 		port        string
-// 		expected    any
-// 		contentType string
-// 		statusCode  int
-// 	}{
-// 		{
-// 			name:        "correct configs, gin, plain text",
-// 			baseUrl:     "http://localhost",
-// 			endpoint:    "/datetime",
-// 			port:        "8083",
-// 			contentType: "text/plain",
-// 			expected:    formattedTime,
-// 			statusCode:  http.StatusOK,
-// 		},
-// 		{
-// 			name:        "correct configs, gin, json",
-// 			baseUrl:     "http://localhost",
-// 			endpoint:    "/datetime",
-// 			port:        "8080",
-// 			contentType: "application/json",
-// 			expected:    timeJson,
-// 			statusCode:  http.StatusOK,
-// 		},
-// 		{
-// 			name:        "correct configs, http, plain text",
-// 			baseUrl:     "http://localhost",
-// 			endpoint:    "/datetime",
-// 			port:        "8080",
-// 			contentType: "text/plain",
-// 			expected:    formattedTime,
-// 			statusCode:  http.StatusOK,
-// 		},
-// 		{
-// 			name:        "correct configs, http, json",
-// 			baseUrl:     "http://localhost",
-// 			endpoint:    "/datetime",
-// 			port:        "8083",
-// 			contentType: "application/json",
-// 			expected:    timeJson,
-// 			statusCode:  http.StatusOK,
-// 		},
-// 		{
-// 			name:        "unsupported content type",
-// 			baseUrl:     "http://localhost",
-// 			endpoint:    "/datetime",
-// 			port:        "8083",
-// 			contentType: "text/javascript; charset=utf-8",
-// 			expected:    http.StatusText(http.StatusUnsupportedMediaType),
-// 			statusCode:  http.StatusUnsupportedMediaType,
-// 		},
-// 	}
-// 	for _, testcase := range testcases {
-// 		t.Run(testcase.name, func(t *testing.T) {
+			c := NewClient(testcase.baseUrl, testcase.endpoint, testcase.port, time.Second)
+			resp, err := c.SendRequest(testcase.contentType)
+			if err != nil {
+				t.Error(err)
+			}
+			resBody, err := readBody(t, resp)
+			if err != nil {
+				t.Error(err)
+			}
 
-// 			c := NewClient(testcase.baseUrl, testcase.endpoint, testcase.port, time.Second)
-// 			resp, err := c.SendRequest(testcase.contentType)
-// 			if err != nil {
-// 				t.Error(err)
-// 			}
-// 			resBody, err := readBody(t, resp)
-// 			if err != nil {
-// 				t.Error(err)
-// 			}
+			if testcase.contentType == "application/json" {
+				assertEquality(t, testcase.expected, resBody)
+			} else {
+				assertEquality(t, testcase.expected, string(resBody))
+			}
+			assertEquality(t, testcase.statusCode, resp.StatusCode)
 
-// 			if testcase.contentType == "application/json" {
-// 				assertEquality(t, testcase.expected, resBody)
-// 			} else {
-// 				assertEquality(t, testcase.expected, string(resBody))
-// 			}
-// 			assertEquality(t, testcase.statusCode, resp.StatusCode)
-
-// 		})
-// 	}
-// }
+		})
+	}
+}
 
 func TestWithMockServer(t *testing.T) {
 	formattedTime := time.Now().Format(time.ANSIC)
