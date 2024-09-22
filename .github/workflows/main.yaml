@@ -42,9 +42,9 @@ jobs:
       - name: pull gin server
         run: docker pull rawanmostafa/ginserver:latest
       - name: run http server
-        run: docker run -d -p 8080:8080 rawanmostafa/httpserver:latest
+        run: docker run -d --name httpserver -p 8080:8080 rawanmostafa/httpserver:latest
       - name: run gin server
-        run: docker run -d -p 8083:8083 rawanmostafa/ginserver:latest
+        run: docker run -d --name ginserver -p 8083:8083 rawanmostafa/ginserver:latest
 
   test:
     runs-on: ubuntu-latest
