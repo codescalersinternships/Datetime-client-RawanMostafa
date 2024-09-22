@@ -34,25 +34,22 @@ jobs:
           gofmt-path: './src'
           gofmt-flags: '-l -d'
 
-  pull-run-images:
+  pull-run-test:
     runs-on: ubuntu-latest
-    steps:
-      - name: pull http server
-        run: docker pull rawanmostafa/httpserver:latest
-      - name: pull gin server
-        run: docker pull rawanmostafa/ginserver:latest
-      - name: run http server
-        run: docker run -d --name httpserver -p 8080:8080 rawanmostafa/httpserver:latest
-      - name: run gin server
-        run: docker run -d --name ginserver -p 8083:8083 rawanmostafa/ginserver:latest
-
-  test:
-    runs-on: ubuntu-latest
-    needs: pull-run-images
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version: stable
-      - name: Test with the Go CLI
+      - name: pull http server
+        run: docker pull rawanmostafa/httpserver:latest
+      - name: pull gin server
+        run: docker pull rawanmostafa/ginserver:latest
+      - name: run http server
+        run: docker run -d -p 8080:8080 rawanmostafa/httpserver:latest
+      - name: run gin server
+        run: docker run -d -p 8083:8083 rawanmostafa/ginserver:latest
+      - name: test
         run: go test -v ./pkg
+
+
