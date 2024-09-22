@@ -42,12 +42,13 @@ jobs:
       - name: pull gin server
         run: docker pull rawanmostafa/ginserver:latest
       - name: run http server
-        run: docker run -p 8080:8080 rawanmostafa/httpserver:latest
+        run: docker run -d -p 8080:8080 rawanmostafa/httpserver:latest
       - name: run gin server
-        run: docker run -p 8083:8083 rawanmostafa/ginserver:latest
-        
+        run: docker run -d -p 8083:8083 rawanmostafa/ginserver:latest
+
   test:
     runs-on: ubuntu-latest
+    needs: pull-run-images
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
