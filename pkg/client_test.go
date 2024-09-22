@@ -50,7 +50,7 @@ func TestRetrySendRequest(t *testing.T) {
 	}{
 		{
 			name:        "correct configs, gin, plain text",
-			baseUrl:     "http://localhost",
+			baseUrl:     "http://ginserver",
 			endpoint:    "/datetime",
 			port:        "8083",
 			contentType: "text/plain",
@@ -59,7 +59,7 @@ func TestRetrySendRequest(t *testing.T) {
 		},
 		{
 			name:        "correct configs, gin, json",
-			baseUrl:     "http://localhost",
+			baseUrl:     "http://ginserver",
 			endpoint:    "/datetime",
 			port:        "8080",
 			contentType: "application/json",
@@ -68,7 +68,7 @@ func TestRetrySendRequest(t *testing.T) {
 		},
 		{
 			name:        "correct configs, http, plain text",
-			baseUrl:     "http://localhost",
+			baseUrl:     "http://httpserver",
 			endpoint:    "/datetime",
 			port:        "8080",
 			contentType: "text/plain",
@@ -77,7 +77,7 @@ func TestRetrySendRequest(t *testing.T) {
 		},
 		{
 			name:        "correct configs, http, json",
-			baseUrl:     "http://localhost",
+			baseUrl:     "http://httpserver",
 			endpoint:    "/datetime",
 			port:        "8083",
 			contentType: "application/json",
@@ -86,7 +86,7 @@ func TestRetrySendRequest(t *testing.T) {
 		},
 		{
 			name:        "unsupported content type",
-			baseUrl:     "http://localhost",
+			baseUrl:     "http://ginserver",
 			endpoint:    "/datetime",
 			port:        "8083",
 			contentType: "text/javascript; charset=utf-8",
@@ -135,7 +135,7 @@ func TestSendRequest(t *testing.T) {
 	}{
 		{
 			name:        "correct configs, gin, plain text",
-			baseUrl:     "http://localhost",
+			baseUrl:     "http://ginserver",
 			endpoint:    "/datetime",
 			port:        "8083",
 			contentType: "text/plain",
@@ -144,7 +144,7 @@ func TestSendRequest(t *testing.T) {
 		},
 		{
 			name:        "correct configs, gin, json",
-			baseUrl:     "http://localhost",
+			baseUrl:     "http://ginserver",
 			endpoint:    "/datetime",
 			port:        "8080",
 			contentType: "application/json",
@@ -153,7 +153,7 @@ func TestSendRequest(t *testing.T) {
 		},
 		{
 			name:        "correct configs, http, plain text",
-			baseUrl:     "http://localhost",
+			baseUrl:     "http://httpserver",
 			endpoint:    "/datetime",
 			port:        "8080",
 			contentType: "text/plain",
@@ -162,7 +162,7 @@ func TestSendRequest(t *testing.T) {
 		},
 		{
 			name:        "correct configs, http, json",
-			baseUrl:     "http://localhost",
+			baseUrl:     "http://httpserver",
 			endpoint:    "/datetime",
 			port:        "8083",
 			contentType: "application/json",
@@ -171,7 +171,7 @@ func TestSendRequest(t *testing.T) {
 		},
 		{
 			name:        "unsupported content type",
-			baseUrl:     "http://localhost",
+			baseUrl:     "http://ginserver",
 			endpoint:    "/datetime",
 			port:        "8083",
 			contentType: "text/javascript; charset=utf-8",
