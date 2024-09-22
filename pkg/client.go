@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
@@ -88,6 +89,10 @@ func (c Client) GetTime() (time.Time, error) {
 	if err != nil {
 		return time.Time{}, err
 	}
+	if resp.StatusCode == http.StatusUnsupportedMediaType {
+		return time.Time{}, fmt.Errorf("%s", http.StatusText(http.StatusUnsupportedMediaType))
+	}
+	body = strings.Trim(body, "\"")
 	timeNow, err := time.Parse(time.ANSIC, body)
 	if err != nil {
 		return time.Time{}, err
