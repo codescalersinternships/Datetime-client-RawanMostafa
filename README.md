@@ -13,7 +13,7 @@ This repository implements an http datetime client that accepts the response of 
 1. Clone the repository
 
    ```bash
-   git clone github.com/codescalersinternships/Datetime-client-RawanMostafa/pkg
+   git clone https://github.com/codescalersinternships/Datetime-client-RawanMostafa.git
    ```
 
 2. Install the dependencies
