@@ -62,7 +62,6 @@ Our application provides default configurations in case no flags are provided an
      
 #### Extra Utilities
   - Check this function to get environment variables : [`decideConfigs`](https://github.com/codescalersinternships/Datetime-client-RawanMostafa/blob/9c3cc7ecf671057648e10d07c550c171b51747a6/cmd/main.go#L43-L76)
-  - Check this function to read the returned response body : [`readBody`](https://github.com/codescalersinternships/Datetime-client-RawanMostafa/blob/9c3cc7ecf671057648e10d07c550c171b51747a6/cmd/main.go#L19-L28)
   - Check this function to get the flags : [`getFlags`](https://github.com/codescalersinternships/Datetime-client-RawanMostafa/blob/9c3cc7ecf671057648e10d07c550c171b51747a6/cmd/main.go#L29-L41)
    
 
