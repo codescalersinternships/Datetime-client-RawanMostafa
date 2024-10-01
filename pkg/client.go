@@ -72,7 +72,7 @@ func (c Client) GetTime() (time.Time, error) {
 	var err error
 
 	expBackoff := backoff.NewExponentialBackOff()
-	expBackoff.MaxElapsedTime = 10 * time.Second
+	expBackoff.MaxElapsedTime = 30 * time.Second
 
 	retryError := backoff.RetryNotify(func() error {
 		resp, err = c.getTime()
