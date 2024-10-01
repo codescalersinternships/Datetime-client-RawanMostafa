@@ -22,6 +22,35 @@ func assertEquality(t *testing.T, obj1 any, obj2 any) {
 	}
 }
 
+func mockServer(t *testing.T) *httptest.Server {
+	t.Helper()
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		currentTime := time.Now()
+		formattedTime := currentTime.Format(time.ANSIC)
+
+		if strings.Contains(r.Header.Get("content-type"), "text/plain") {
+
+			w.Header().Set("Content-Type", "text/plain")
+			fmt.Fprint(w, formattedTime)
+
+		} else if strings.Contains(r.Header.Get("content-type"), "application/json") {
+
+			w.Header().Set("Content-Type", "application/json")
+
+			timeJson, err := json.Marshal(formattedTime)
+			if err != nil {
+				log.Fatalf("error converting to json: %v", err)
+			}
+			_, err = w.Write(timeJson)
+			if err != nil {
+				log.Fatalf("error writing data to response: %v", err)
+			}
+		} else {
+			http.Error(w, http.StatusText(http.StatusUnsupportedMediaType), http.StatusUnsupportedMediaType)
+		}
+	}))
+}
+
 func TestGetTime(t *testing.T) {
 	formattedTime := time.Now().Format(time.ANSIC)
 	expectedTime, err := time.Parse(time.ANSIC, formattedTime)
@@ -141,31 +170,7 @@ func TestGetTimeMock(t *testing.T) {
 	}
 	for _, testcase := range testcases {
 		t.Run(testcase.name, func(t *testing.T) {
-			mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				currentTime := time.Now()
-				formattedTime := currentTime.Format(time.ANSIC)
-
-				if strings.Contains(r.Header.Get("content-type"), "text/plain") {
-
-					w.Header().Set("Content-Type", "text/plain")
-					fmt.Fprint(w, formattedTime)
-
-				} else if strings.Contains(r.Header.Get("content-type"), "application/json") {
-
-					w.Header().Set("Content-Type", "application/json")
-
-					timeJson, err := json.Marshal(formattedTime)
-					if err != nil {
-						log.Fatalf("error converting to json: %v", err)
-					}
-					_, err = w.Write(timeJson)
-					if err != nil {
-						log.Fatalf("error writing data to response: %v", err)
-					}
-				} else {
-					http.Error(w, http.StatusText(http.StatusUnsupportedMediaType), http.StatusUnsupportedMediaType)
-				}
-			}))
+			mockServer := mockServer(t)
 
 			defer mockServer.Close()
 
