@@ -27,34 +27,26 @@ func getFlags() (string, string, string) {
 	return baseUrl, endpoint, port
 }
 
-func decideConfigs() (string, string, string) {
+func loadConfigs() (string, string, string) {
 
 	baseUrl, endpoint, port := getFlags()
+	var found bool
 
 	if baseUrl == "" {
-		envBaseUrl, found := os.LookupEnv("DATETIME_BASEURL")
-
-		if found {
-			baseUrl = envBaseUrl
-		} else {
+		baseUrl, found = os.LookupEnv("DATETIME_BASEURL")
+		if !found {
 			baseUrl = defaltBaseUrl
 		}
 	}
 	if endpoint == "" {
-		envEndpoint, found := os.LookupEnv("DATETIME_ENDPOINT")
-
-		if found {
-			endpoint = envEndpoint
-		} else {
+		endpoint, found = os.LookupEnv("DATETIME_ENDPOINT")
+		if !found {
 			endpoint = defaultEndpoint
 		}
 	}
 	if port == "" {
-		envPort, found := os.LookupEnv("DATETIME_PORT")
-
-		if found {
-			port = envPort
-		} else {
+		port, found = os.LookupEnv("DATETIME_PORT")
+		if !found {
 			port = defaultPort
 		}
 	}
@@ -63,7 +55,7 @@ func decideConfigs() (string, string, string) {
 }
 
 func main() {
-	baseUrl, endpoint, port := decideConfigs()
+	baseUrl, endpoint, port := loadConfigs()
 
 	c := pkg.NewClient(baseUrl, endpoint, port, "text/plain", time.Second)
 	timeNow, err := c.GetTime()

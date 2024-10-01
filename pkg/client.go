@@ -85,12 +85,14 @@ func (c Client) GetTime() (time.Time, error) {
 		slog.Error("failed to make the request after retries: %v", err)
 		return time.Time{}, fmt.Errorf("failed to make the request after retries: %v", err)
 	}
+
+	if resp.StatusCode == http.StatusUnsupportedMediaType {
+		return time.Time{}, fmt.Errorf("%s", http.StatusText(http.StatusUnsupportedMediaType))
+	}
+
 	body, err := readBody(resp)
 	if err != nil {
 		return time.Time{}, err
-	}
-	if resp.StatusCode == http.StatusUnsupportedMediaType {
-		return time.Time{}, fmt.Errorf("%s", http.StatusText(http.StatusUnsupportedMediaType))
 	}
 	body = strings.Trim(body, "\"")
 	timeNow, err := time.Parse(time.ANSIC, body)
