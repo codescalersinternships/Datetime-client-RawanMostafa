@@ -1,0 +1,54 @@
+name: Go CI
+
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23.1'
+      - name: Build
+        run: go build -v ./...
+  
+
+  golangci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.60
+      - name: Go Format
+        uses: Jerome1337/gofmt-action@v1.0.5
+        with:
+          gofmt-path: './src'
+          gofmt-flags: '-l -d'
+
+  pull-run-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: pull http server
+        run: docker pull rawanmostafa/httpserver:latest
+      - name: pull gin server
+        run: docker pull rawanmostafa/ginserver:latest
+      - name: run http server
+        run: docker run -d -p 8080:8080 rawanmostafa/httpserver:latest
+      - name: run gin server
+        run: docker run -d -p 8083:8083 rawanmostafa/ginserver:latest
+      - name: test
+        run: go test -v ./pkg
+
+
